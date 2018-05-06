@@ -79,15 +79,21 @@ public class Komunikacija extends Thread {
 		for (Uplata u : rezervacija.getListaUplata()) {
 			ukupnoUplaceno += u.getIznos();
 		}
-		if (ukupnoUplaceno < rezervacija.getCena()) {
-			rezervacija.setStatus("delimicno uplacena");
+		if (rezervacija.getListaUplata().size() == rezervacija.getBrojRata()
+				&& ukupnoUplaceno != rezervacija.getCena()) {
+			rezervacija.setStatus("nepotpuna");
+			rezervacija.getListaUplata().remove(uplata);
 		} else {
-			rezervacija.setStatus("uplacena");
-		}
+			if (ukupnoUplaceno < rezervacija.getCena()) {
+				rezervacija.setStatus("delimicno uplacena");
+			} else {
+				rezervacija.setStatus("uplacena");
+			}
 
-		for (Rezervacija rez : Podaci.listaRezervacija) {
-			if (rez.getId() == rezervacija.getId()) {
-				rez = rezervacija;
+			for (Rezervacija rez : Podaci.listaRezervacija) {
+				if (rez.getId() == rezervacija.getId()) {
+					rez = rezervacija;
+				}
 			}
 		}
 		return rezervacija;

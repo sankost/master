@@ -63,11 +63,9 @@ public class UplataForma extends JDialog {
 		}
 		{
 			textFieldIznos = new JTextField();
-			textFieldIznos.setEnabled(false);
 			textFieldIznos.setColumns(10);
 			textFieldIznos.setBounds(87, 81, 102, 20);
 			contentPanel.add(textFieldIznos);
-			textFieldIznos.setText((glavnaForma.rezervacija.getCena()/Integer.parseInt(glavnaForma.comboBoxBrojRata.getSelectedItem().toString()) + ""));
 		}
 		{
 			JPanel buttonPane = new JPanel();
@@ -93,9 +91,14 @@ public class UplataForma extends JDialog {
 						uplata.setRezervacija(glavnaForma.rezervacija);
 						try {
 							glavnaForma.rezervacija = Razmena.vratiInstancu().dodajUplatnicu(uplata);
+							if(glavnaForma.rezervacija.getStatus().equals("nepotpuna")){
+								System.out.println("Greska pri unosu iznosa ");
+								JOptionPane.showMessageDialog(null, "Morate uneti celokupan preostali iznos!",
+										"Greska pri unosu iznosa uplate", JOptionPane.ERROR_MESSAGE);
+								return;
+							}
 						} catch (Exception ex) {
-							// TODO Auto-generated catch block
-							ex.printStackTrace();
+							System.out.println("Exception");
 						}
 						System.out.println("Uplata je dodata");
 						glavnaForma.azuririajPerostaliIznos();
