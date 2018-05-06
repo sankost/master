@@ -38,7 +38,7 @@ public class Podaci {
 	}
 	
 	public static void dodajRezervaciju(Rezervacija rezervacija){
-		idRezervacije = idRezervacije +1;
+		idRezervacije ++;
 		listaRezervacija.add(rezervacija);
 	}
 }
