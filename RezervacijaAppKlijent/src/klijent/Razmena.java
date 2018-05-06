@@ -2,6 +2,7 @@ package klijent;
 
 import java.io.IOException;
 import domen.Rezervacija;
+import domen.Uplata;
 import komunikacija.TransferniObjekat;
 
 public class Razmena {
@@ -35,6 +36,21 @@ public class Razmena {
         TransferniObjekat to = new TransferniObjekat();
         to.setOperacija("rezervacija");
         to.setParametar(rezervacija);
+        Komunikacija.getInstance().posaljiZahtev(to);
+        to = (TransferniObjekat) Komunikacija.getInstance().primiOdgovor();
+        if (to.getIzuzetak() != null) {
+            to.getIzuzetak().printStackTrace();
+            throw to.getIzuzetak();
+        }
+        rez = (Rezervacija) to.getRezultat();
+        return rez;
+    }
+	
+	public Rezervacija dodajUplatnicu(Uplata uplata) throws IOException, ClassNotFoundException, Exception {
+        Rezervacija rez = null;
+        TransferniObjekat to = new TransferniObjekat();
+        to.setOperacija("uplata");
+        to.setParametar(uplata);
         Komunikacija.getInstance().posaljiZahtev(to);
         to = (TransferniObjekat) Komunikacija.getInstance().primiOdgovor();
         if (to.getIzuzetak() != null) {

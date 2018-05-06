@@ -164,7 +164,7 @@ public class GlavnaForma extends JFrame {
 				}
 				int brOsoba = Integer.parseInt(textField_brojOsoba.getText());
 				textField_soba.setText("");
-				rezervacija = new Rezervacija("nova", vreme1, vreme2, null, brOsoba, 0);
+				rezervacija = new Rezervacija("nova", vreme1, vreme2, brOsoba);
 				System.out.println("Provera rezervacije na klijentu. Status: "+rezervacija.getStatus());
 				try {
 					rezervacija = Razmena.vratiInstancu().proveriRezervaciju(rezervacija);
@@ -198,17 +198,12 @@ public class GlavnaForma extends JFrame {
 
 		btnRezervisi.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				try {
-					rezervacija.setCena(Double.parseDouble(textField_cena.getText()));
-					if(rdbtnPlacanjeNaRate.isSelected()){
-						int rata = Integer.parseInt(comboBoxBrojRata.getSelectedItem().toString());
-						rezervacija.inicijalizujListu(rata);
-						rezervacija.setTipPlacanja(TipPlacanja.na_rate);
-					}else{
-						rezervacija.inicijalizujListu(1);
-						rezervacija.setTipPlacanja(TipPlacanja.gotovinsko);
+					try {
+						rezervacija = Razmena.vratiInstancu().rezervisi(rezervacija);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
-					rezervacija = Razmena.vratiInstancu().rezervisi(rezervacija);
 					textField_status.setText(rezervacija.getStatus());	
 					textField_cena.setText(rezervacija.getCena()+"");
 					if(rezervacija.getStatus().equals("rezervisana")){
@@ -221,9 +216,7 @@ public class GlavnaForma extends JFrame {
 						textField_uplata.setText(rezervacija.getCena()+"");
 						btnPlati.setEnabled(true);
 					}
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
+				
 			}
 		});
 
@@ -233,13 +226,20 @@ public class GlavnaForma extends JFrame {
 				if(rdbtnGotovinskoPlacanje.isSelected()){
 					Date date = new Date(Calendar.getInstance().getTime().getTime());
 					Uplata uplata = new Uplata(rezervacija.getCena(), date);
-					rezervacija.dodajUplatu(uplata);
+					uplata.setRezervacija(rezervacija);
+					try {
+						rezervacija = Razmena.vratiInstancu().dodajUplatnicu(uplata);
+					} catch (Exception e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
 					azuririajPerostaliIznos();
 				}else{
 				 UplataForma dialog = new UplataForma(frame);
 				 dialog.setModal(true);
 				 dialog.setVisible(true);
 				}
+				textField_status.setText(rezervacija.getStatus());
 			}
 		});
 		
@@ -250,10 +250,15 @@ public class GlavnaForma extends JFrame {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
 	        	comboBoxBrojRata.setEnabled(true);
-	        	int rata = Integer.parseInt(comboBoxBrojRata.getSelectedItem().toString());
-	        	double cena = rezervacija.getCena();
-	        	cena += cena * rata * 0.1;
-	        	textField_cena.setText(cena + "");
+	        	rezervacija.setTipPlacanja(TipPlacanja.na_rate);
+	        	rezervacija.setBrojRata(Integer.parseInt(comboBoxBrojRata.getSelectedItem().toString()));
+	        	try {
+					rezervacija = Razmena.vratiInstancu().proveriRezervaciju(rezervacija);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}       	
+	        	textField_cena.setText(rezervacija.getCena() + "");
 	        }
 	    });
 		
@@ -261,6 +266,13 @@ public class GlavnaForma extends JFrame {
 	        @Override
 	        public void actionPerformed(ActionEvent e) {
 	        	comboBoxBrojRata.setEnabled(false);
+	        	rezervacija.setTipPlacanja(TipPlacanja.gotovinsko);
+	        	try {
+					rezervacija = Razmena.vratiInstancu().proveriRezervaciju(rezervacija);
+				} catch (Exception e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
 	        	textField_cena.setText(rezervacija.getCena() + "");
 	       }
 	    }); 

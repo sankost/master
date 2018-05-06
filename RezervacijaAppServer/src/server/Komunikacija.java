@@ -13,6 +13,8 @@ import java.util.logging.Logger;
 import data.Podaci;
 import domen.Rezervacija;
 import domen.Soba;
+import domen.Uplata;
+import domen.Rezervacija.TipPlacanja;
 import komunikacija.TransferniObjekat;
 
 public class Komunikacija extends Thread {
@@ -43,11 +45,14 @@ public class Komunikacija extends Thread {
 			} catch (IOException | ClassNotFoundException ex) {
 				Logger.getLogger(Komunikacija.class.getName()).log(Level.SEVERE, null, ex);
 			}
-			if(o!= null && o.getOperacija().equals("provera")){
+			if (o != null && o.getOperacija().equals("provera")) {
 				o.setRezultat(proveriRezervaciju((Rezervacija) o.getParametar()));
 			}
-			if(o!= null && o.getOperacija().equals("rezervacija")){
+			if (o != null && o.getOperacija().equals("rezervacija")) {
 				o.setRezultat(rezervisi((Rezervacija) o.getParametar()));
+			}
+			if (o != null && o.getOperacija().equals("uplata")) {
+				o.setRezultat(dodajUplatu((Uplata) o.getParametar()));
 			}
 			if (o != null && o.getOperacija().equals("kraj")) {
 				try {
@@ -66,12 +71,33 @@ public class Komunikacija extends Thread {
 			}
 		}
 	}
-	
+
+	private Rezervacija dodajUplatu(Uplata uplata) {
+		Rezervacija rezervacija = uplata.getRezervacija();
+		rezervacija.dodajUplatu(uplata);
+		double ukupnoUplaceno = 0;
+		for (Uplata u : rezervacija.getListaUplata()) {
+			ukupnoUplaceno += u.getIznos();
+		}
+		if (ukupnoUplaceno < rezervacija.getCena()) {
+			rezervacija.setStatus("delimicno uplacena");
+		} else {
+			rezervacija.setStatus("uplacena");
+		}
+
+		for (Rezervacija rez : Podaci.listaRezervacija) {
+			if (rez.getId() == rezervacija.getId()) {
+				rez = rezervacija;
+			}
+		}
+		return rezervacija;
+	}
+
 	@SuppressWarnings("deprecation")
 	public Rezervacija proveriRezervaciju(Rezervacija rez) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(rez.getDatumOd());
-		
+
 		ArrayList<Soba> odgovarajuceSobe = new ArrayList<>();
 		for (Soba s : Podaci.listaSoba) {
 			if (s.getBrojMesta() == rez.getBrOsoba()) {
@@ -80,7 +106,8 @@ public class Komunikacija extends Thread {
 		}
 		for (Rezervacija r : Podaci.listaRezervacija) {
 			if (r.getBrOsoba() == rez.getBrOsoba()) {
-				if (rez.getDatumOd().before(r.getDatumDo()) && (rez.getDatumOd().after(r.getDatumOd()) || rez.getDatumOd().equals(r.getDatumOd()))
+				if (rez.getDatumOd().before(r.getDatumDo())
+						&& (rez.getDatumOd().after(r.getDatumOd()) || rez.getDatumOd().equals(r.getDatumOd()))
 						|| (rez.getDatumDo().before(r.getDatumDo()) && (rez.getDatumDo().after(r.getDatumOd())))
 						|| (rez.getDatumOd().before(r.getDatumOd()) && (rez.getDatumDo().after(r.getDatumDo())))) {
 					odgovarajuceSobe.remove(r.getSoba());
@@ -90,36 +117,44 @@ public class Komunikacija extends Thread {
 		if (odgovarajuceSobe.size() > 0) {
 			rez.setSoba(odgovarajuceSobe.get(0));
 			rez.setStatus("odobrena");
-			
+
 			int cena = 0;
 			Date datum = rez.getDatumOd();
-			while(datum.before(rez.getDatumDo())){
-				if(datum.getDay() == 0 ||datum.getDay() == 6){
+			while (datum.before(rez.getDatumDo())) {
+				if (datum.getDay() == 0 || datum.getDay() == 6) {
 					cena += 2000;
-				}else{
+				} else {
 					cena += 1000;
 				}
 				calendar.add(Calendar.DAY_OF_YEAR, 1);
 				datum = new Date(calendar.getTimeInMillis());
 			}
-			rez.setCena(cena*rez.getBrOsoba());
+			if (rez.getTipPlacanja() == TipPlacanja.na_rate) {
+				cena += cena * rez.getBrojRata() * 0.1;
+			}
+			rez.setCena(cena * rez.getBrOsoba());
 		} else {
 			rez.setStatus("odbijena");
 		}
-		
+
 		return rez;
 
 	}
 
 	public Rezervacija rezervisi(Rezervacija rez) {
-		if(rez.getStatus().equals("odobrena")){
+		if (rez.getStatus().equals("odobrena")) {
 			rez.setId(Podaci.idRezervacije);
+			if (rez.getTipPlacanja() == TipPlacanja.gotovinsko) {
+				rez.inicijalizujListu(1);
+			} else {
+				rez.inicijalizujListu(rez.getBrojRata());
+			}
 			Podaci.dodajRezervaciju(rez);
 			for (Rezervacija r : Podaci.listaRezervacija) {
 				System.out.println(r);
 			}
 			rez.setStatus("rezervisana");
-		}			
+		}
 		return rez;
 	}
 }

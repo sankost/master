@@ -9,6 +9,7 @@ import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 
 import domen.Uplata;
+import klijent.Razmena;
 
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -21,6 +22,10 @@ import java.awt.event.ActionEvent;
 
 public class UplataForma extends JDialog {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private final JPanel contentPanel = new JPanel();
 	private JTextField textFieldDatum;
 	private JTextField textFieldIznos;
@@ -85,7 +90,13 @@ public class UplataForma extends JDialog {
 						}
 						Double iznos = Double.parseDouble(textFieldIznos.getText());
 						Uplata uplata = new Uplata(iznos, datumUplate);
-						glavnaForma.rezervacija.dodajUplatu(uplata);
+						uplata.setRezervacija(glavnaForma.rezervacija);
+						try {
+							glavnaForma.rezervacija = Razmena.vratiInstancu().dodajUplatnicu(uplata);
+						} catch (Exception ex) {
+							// TODO Auto-generated catch block
+							ex.printStackTrace();
+						}
 						System.out.println("Uplata je dodata");
 						glavnaForma.azuririajPerostaliIznos();
 						setVisible(false);

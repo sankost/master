@@ -15,8 +15,16 @@ public class Rezervacija implements Serializable {
 	int brOsoba;
 	double cena;
 	TipPlacanja tipPlacanja;
+	int brojRata;
 	ArrayList<Uplata> listaUplata;
 
+	public Rezervacija(String status, Date datumOd, Date datumDo, int brOsoba) {
+		this.status = status;
+		this.datumOd = datumOd;
+		this.datumDo = datumDo;
+		this.brOsoba = brOsoba;
+	}
+	
 	public Rezervacija(String status, Date datumOd, Date datumDo, Soba soba, int brOsoba, double cena) {
 		this.status = status;
 		this.datumOd = datumOd;
@@ -107,6 +115,15 @@ public class Rezervacija implements Serializable {
 
 	public void setTipPlacanja(TipPlacanja tipPlacanja) {
 		this.tipPlacanja = tipPlacanja;
+	}
+	
+
+	public int getBrojRata() {
+		return brojRata;
+	}
+
+	public void setBrojRata(int brojRata) {
+		this.brojRata = brojRata;
 	}
 
 	@Override

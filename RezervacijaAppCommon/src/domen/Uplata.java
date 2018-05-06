@@ -8,6 +8,7 @@ public class Uplata implements Serializable{
 	private static final long serialVersionUID = 1L;
 	double iznos;
 	Date datumUplate;
+	Rezervacija rezervacija;
 	
 	public Uplata(double iznos, Date datumUplate) {
 		this.iznos = iznos;
@@ -28,6 +29,14 @@ public class Uplata implements Serializable{
 
 	public void setDatumUplate(Date datumUplate) {
 		this.datumUplate = datumUplate;
+	}
+
+	public Rezervacija getRezervacija() {
+		return rezervacija;
+	}
+
+	public void setRezervacija(Rezervacija rezervacija) {
+		this.rezervacija = rezervacija;
 	}
 	
 	
