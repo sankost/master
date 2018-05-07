@@ -29,7 +29,7 @@ public class Server extends Thread {
 			while (!kraj) {
 				Socket soket = ss.accept();
 				System.out.println("Klijent se povezao sa serverom!");
-				Komunikacija kom = new Komunikacija(soket, this);
+				RezervacijaServis kom = new RezervacijaServis(soket, this);
 				kom.start();
 			}
 		} catch (IOException ex) {

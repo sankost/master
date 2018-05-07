@@ -17,7 +17,7 @@ import domen.Uplata;
 import domen.Rezervacija.TipPlacanja;
 import komunikacija.TransferniObjekat;
 
-public class Komunikacija extends Thread {
+public class RezervacijaServis extends Thread {
 
 	Socket soket;
 	ObjectInputStream in;
@@ -25,14 +25,14 @@ public class Komunikacija extends Thread {
 	Server server;
 	boolean kraj = false;
 
-	public Komunikacija(Socket soket, Server server) {
+	public RezervacijaServis(Socket soket, Server server) {
 		this.soket = soket;
 		this.server = server;
 		try {
 			in = new ObjectInputStream(soket.getInputStream());
 			out = new ObjectOutputStream(soket.getOutputStream());
 		} catch (IOException ex) {
-			Logger.getLogger(Komunikacija.class.getName()).log(Level.SEVERE, null, ex);
+			Logger.getLogger(RezervacijaServis.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
 
@@ -43,7 +43,7 @@ public class Komunikacija extends Thread {
 			try {
 				o = (TransferniObjekat) in.readObject();
 			} catch (IOException | ClassNotFoundException ex) {
-				Logger.getLogger(Komunikacija.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(RezervacijaServis.class.getName()).log(Level.SEVERE, null, ex);
 			}
 			if (o != null && o.getOperacija().equals("provera")) {
 				o.setRezultat(proveriRezervaciju((Rezervacija) o.getParametar()));
@@ -67,7 +67,7 @@ public class Komunikacija extends Thread {
 			try {
 				out.writeObject(o);
 			} catch (IOException ex) {
-				Logger.getLogger(Komunikacija.class.getName()).log(Level.SEVERE, null, ex);
+				Logger.getLogger(RezervacijaServis.class.getName()).log(Level.SEVERE, null, ex);
 			}
 		}
 	}
